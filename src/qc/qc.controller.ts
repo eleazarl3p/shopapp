@@ -22,10 +22,10 @@ import { TaskAreaHistoryDto } from 'src/task/dto/task-to-area.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { TaskService } from 'src/task/task.service';
 import { RFDto } from './dto/rf.dto';
-import { FilesInterceptor } from '@nestjs/platform-express';
 // import { GldriveService } from 'src/gldrive/gldrive.service';
 import { plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
+import { GgdrvService } from 'src/ggdrv/ggdrv.service';
 
 @Controller('qc')
 @UseGuards(AuthGuard('jwt'))
@@ -33,7 +33,7 @@ export class QcController {
   constructor(
     private readonly qcService: QcService,
     private readonly taskService: TaskService,
-    // private readonly googleDriveService: GldriveService,
+    private readonly googleDriveService: GgdrvService,
   ) {}
 
   @Get('completed-tasks/:paquete')
@@ -110,17 +110,17 @@ export class QcController {
   //   }),
   // )
   async submitFormReview(
-    // @UploadedFiles() photos: Express.Multer.File[],
+    @UploadedFiles() photos: Express.Multer.File[],
     @Query('piecemarks') piecemarks: string,
     @Body('json') jsonData: string,
     @Request() req: any,
   ) {
     let imageUrls = [];
 
-    // if (photos != null && photos.length > 0) {
-    //   // const uploadedImages = await this.googleDriveService.uploadFiles(photos);
-    //   // imageUrls = uploadedImages.map((img) => img.id);
-    // }
+    if (photos != null && photos.length > 0) {
+      const uploadedImages = await this.googleDriveService.uploadFiles(photos);
+      imageUrls = uploadedImages.map((img) => img.id);
+    }
 
     if (piecemarks == 'materials') {
       const parsedJson = JSON.parse(jsonData);

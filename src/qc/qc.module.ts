@@ -10,6 +10,7 @@ import {
   MemberInspection,
 } from './entity/inspection.entity';
 import { InspectionCriteria } from './entity/inspection-criteria.entity';
+import { GgdrvModule } from 'src/ggdrv/ggdrv.module';
 // import { GldriveModule } from 'src/gldrive/gldrive.module';
 
 @Module({
@@ -22,7 +23,7 @@ import { InspectionCriteria } from './entity/inspection-criteria.entity';
     ]),
     TaskModule,
     JobModule,
-    // GldriveModule,
+    GgdrvModule,
   ],
   controllers: [QcController],
   providers: [QcService],
