@@ -37,4 +37,26 @@ export class GgdrvController {
       // uploadedFiles,
     };
   }
+
+  // @Post()
+  // @UseInterceptors(FileInterceptor('file'))
+  // async uploadFiles(@UploadedFiles() file: Express.Multer.File) {
+  //   if (!file) {
+  //     throw new Error('No file uploaded!');
+  //   }
+
+  //   console.log('File received:', file);
+
+  //   // Check if buffer is available
+  //   if (!file.buffer) {
+  //     throw new Error('File buffer is undefined');
+  //   }
+
+  //   // const uploadResult = await this.googleDriveService.uploadFile(file);
+  //   return {
+  //     message: 'File uploaded successfully!',
+  //     // fileId: uploadResult.id,
+  //     // fileName: uploadResult.name,
+  //   };
+  // }
 }
