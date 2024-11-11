@@ -4,6 +4,23 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 import * as dotenv from 'dotenv';
+import { JobModule } from './job/job.module';
+import { PaqueteModule } from './paquete/paquete.module';
+import { MaterialModule } from './material/material.module';
+import { MemberModule } from './member/member.module';
+import { ContactModule } from './contact/contact.module';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { LevelModule } from './level/level.module';
+import { AreaModule } from './area/area.module';
+import { TicketModule } from './ticket/ticket.module';
+import { MachineModule } from './machine/machine.module';
+import { ShapeModule } from './shape/shape.module';
+import { TeamModule } from './team/team.module';
+import { TaskModule } from './task/task.module';
+import { TruckModule } from './truck/truck.module';
+import { SpecialuserModule } from './specialuser/specialuser.module';
+import { QcModule } from './qc/qc.module';
 
 dotenv.config();
 @Module({
@@ -20,6 +37,23 @@ dotenv.config();
       synchronize: true,
       timezone: 'Z',
     }),
+    JobModule,
+    PaqueteModule,
+    MaterialModule,
+    MemberModule,
+    ContactModule,
+    AuthModule,
+    UserModule,
+    LevelModule,
+    AreaModule,
+    TicketModule,
+    MachineModule,
+    ShapeModule,
+    TeamModule,
+    TaskModule,
+    TruckModule,
+    QcModule,
+    SpecialuserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
