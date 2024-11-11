@@ -97,18 +97,6 @@ export class QcController {
     return this.taskService.failedCutMaterials(paqueteId);
   }
 
-  // @Post('submit-form')
-  // @UseInterceptors(
-  //   FilesInterceptor('photos', 5, {
-  //     fileFilter: (req, file, cb) => {
-  //       if (file.mimetype.startsWith('image/')) {
-  //         cb(null, true);
-  //       } else {
-  //         cb(new Error('Invalid file type, only images are allowed!'), false);
-  //       }
-  //     },
-  //   }),
-  // )
   async submitFormReview(
     @UploadedFiles() photos: Express.Multer.File[],
     @Query('piecemarks') piecemarks: string,
@@ -117,10 +105,10 @@ export class QcController {
   ) {
     let imageUrls = [];
 
-    if (photos != null && photos.length > 0) {
-      const uploadedImages = await this.googleDriveService.uploadFiles(photos);
-      imageUrls = uploadedImages.map((img) => img.id);
-    }
+    // if (photos != null && photos.length > 0) {
+    //   // const uploadedImages = await this.googleDriveService.uploadFiles(photos);
+    //   // imageUrls = uploadedImages.map((img) => img.id);
+    // }
 
     if (piecemarks == 'materials') {
       const parsedJson = JSON.parse(jsonData);

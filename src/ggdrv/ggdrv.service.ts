@@ -43,26 +43,26 @@ export class GgdrvService {
     await this.driveClient.files.delete({ fileId });
   }
 
-  async uploadPdfToDrive(pdfBuffer: Buffer, filename: string): Promise<string> {
-    const fileMetadata = {
-      name: filename,
-      parents: ['1d2WQ7rRehM0fFSv3fM35_lStIg8J6nwj'],
-    };
+  //   async uploadPdfToDrive(pdfBuffer: Buffer, filename: string): Promise<string> {
+  //     const fileMetadata = {
+  //       name: filename,
+  //       parents: ['1d2WQ7rRehM0fFSv3fM35_lStIg8J6nwj'],
+  //     };
 
-    const media = {
-      mimeType: 'application/pdf',
-      body: this.bufferToStream(pdfBuffer),
-    };
+  //     const media = {
+  //       mimeType: 'application/pdf',
+  //       body: this.bufferToStream(pdfBuffer),
+  //     };
 
-    const response = await this.driveClient.files.create({
-      requestBody: fileMetadata,
-      media: media,
-      fields: 'id, name',
-    });
+  //     const response = await this.driveClient.files.create({
+  //       requestBody: fileMetadata,
+  //       media: media,
+  //       fields: 'id, name',
+  //     });
 
-    return response.data.id;
-    //console.log('File uploaded successfully with ID:', response.data.id);
-  }
+  //     return response.data.id;
+  //     //console.log('File uploaded successfully with ID:', response.data.id);
+  //   }
 
   bufferToStream(buffer: Buffer): Readable {
     const readable = new Readable();
