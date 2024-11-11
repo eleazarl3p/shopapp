@@ -13,7 +13,7 @@ import { InspectionCriteria } from './entity/inspection-criteria.entity';
 // import { GldriveService } from 'src/gldrive/gldrive.service';
 
 // pdf
-import puppeteer from 'puppeteer';
+// import puppeteer from 'puppeteer';
 import { writeFileSync } from 'fs';
 @Injectable()
 export class QcService {
@@ -304,7 +304,7 @@ export class QcService {
 
         const html = this.genHtml(rep, questions, answers, photos);
 
-        const pdfBuffer = await this.createPdfFromHtml(html);
+        // const pdfBuffer = await this.createPdfFromHtml(html);
         // const fileId = await this.googleDriveService.uploadPdfToDrive(
         //   pdfBuffer,
         //   `Report ${Date()} ${rfId} - ${material['piecemark']}`,
@@ -320,28 +320,28 @@ export class QcService {
     }
   }
 
-  async createPdfFromHtml(htmlContent: string): Promise<Buffer> {
-    // Launch a headless browser
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
+  // async createPdfFromHtml(htmlContent: string): Promise<Buffer> {
+  //   // Launch a headless browser
+  //   // const browser = await puppeteer.launch();
+  //   const page = await browser.newPage();
 
-    // Set the HTML content of the page
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+  //   // Set the HTML content of the page
+  //   await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
-    // Generate the PDF
-    const pdfUint8Array = await page.pdf({
-      format: 'Letter',
-      printBackground: true,
-    });
+  //   // Generate the PDF
+  //   const pdfUint8Array = await page.pdf({
+  //     format: 'Letter',
+  //     printBackground: true,
+  //   });
 
-    // Save the PDF to a file
-    writeFileSync('styled-output.pdf', pdfUint8Array);
+  //   // Save the PDF to a file
+  //   writeFileSync('styled-output.pdf', pdfUint8Array);
 
-    // Close the browser
-    await browser.close();
+  //   // Close the browser
+  //   await browser.close();
 
-    return Buffer.from(pdfUint8Array);
-  }
+  //   return Buffer.from(pdfUint8Array);
+  // }
 
   genHtml(
     inspection: MaterialInspection,

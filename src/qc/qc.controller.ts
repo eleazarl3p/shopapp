@@ -97,30 +97,30 @@ export class QcController {
     return this.taskService.failedCutMaterials(paqueteId);
   }
 
-  @Post('submit-form')
-  @UseInterceptors(
-    FilesInterceptor('photos', 5, {
-      fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
-          cb(null, true);
-        } else {
-          cb(new Error('Invalid file type, only images are allowed!'), false);
-        }
-      },
-    }),
-  )
+  // @Post('submit-form')
+  // @UseInterceptors(
+  //   FilesInterceptor('photos', 5, {
+  //     fileFilter: (req, file, cb) => {
+  //       if (file.mimetype.startsWith('image/')) {
+  //         cb(null, true);
+  //       } else {
+  //         cb(new Error('Invalid file type, only images are allowed!'), false);
+  //       }
+  //     },
+  //   }),
+  // )
   async submitFormReview(
-    @UploadedFiles() photos: Express.Multer.File[],
+    // @UploadedFiles() photos: Express.Multer.File[],
     @Query('piecemarks') piecemarks: string,
     @Body('json') jsonData: string,
     @Request() req: any,
   ) {
     let imageUrls = [];
 
-    if (photos != null && photos.length > 0) {
-      // const uploadedImages = await this.googleDriveService.uploadFiles(photos);
-      // imageUrls = uploadedImages.map((img) => img.id);
-    }
+    // if (photos != null && photos.length > 0) {
+    //   // const uploadedImages = await this.googleDriveService.uploadFiles(photos);
+    //   // imageUrls = uploadedImages.map((img) => img.id);
+    // }
 
     if (piecemarks == 'materials') {
       const parsedJson = JSON.parse(jsonData);
@@ -165,51 +165,51 @@ export class QcController {
     return this.taskService.getReports(paqueteId);
   }
 
-  // // QC update report
+  // // // QC update report
+  // // @Patch('report/:id')
+  // // updateReport(
+  // //   @Param('id', ParseIntPipe) reportId: number,
+  // //   @Body() rfDto: any,
+  // //   @Request() req: any,
+  // // ) {
+  // //   const userId = req.user.sub;
+  // //   return this.qcService.updateReport(reportId, rfDto, userId);
+  // // }
+
   // @Patch('report/:id')
-  // updateReport(
+  // @UseInterceptors(
+  //   FilesInterceptor('photos', 5, {
+  //     fileFilter: (req, file, cb) => {
+  //       if (file.mimetype.startsWith('image/')) {
+  //         cb(null, true);
+  //       } else {
+  //         cb(new Error('Invalid file type, only images are allowed!'), false);
+  //       }
+  //     },
+  //   }),
+  // )
+  // async updateFormReview(
+  //   @UploadedFiles() photos: Express.Multer.File[],
   //   @Param('id', ParseIntPipe) reportId: number,
-  //   @Body() rfDto: any,
+  //   @Body('json') jsonData: string,
   //   @Request() req: any,
   // ) {
+  //   let imageUrls = [];
+  //   const parsedJson = JSON.parse(jsonData);
+  //   const rfDto = plainToInstance(RFDto, parsedJson);
+
+  //   try {
+  //     await validateOrReject(rfDto); // Validate the DTO
+  //   } catch (errors) {
+  //     throw new BadRequestException('Data not valid');
+  //   }
+  //   if (photos != null && photos.length > 0) {
+  //     // const uploadedImages = await this.googleDriveService.uploadFiles(photos);
+  //     // imageUrls = uploadedImages.map((img) => img.id);
+  //   }
+
   //   const userId = req.user.sub;
-  //   return this.qcService.updateReport(reportId, rfDto, userId);
+
+  //   return this.qcService.updateReport(reportId, rfDto, imageUrls, userId);
   // }
-
-  @Patch('report/:id')
-  @UseInterceptors(
-    FilesInterceptor('photos', 5, {
-      fileFilter: (req, file, cb) => {
-        if (file.mimetype.startsWith('image/')) {
-          cb(null, true);
-        } else {
-          cb(new Error('Invalid file type, only images are allowed!'), false);
-        }
-      },
-    }),
-  )
-  async updateFormReview(
-    @UploadedFiles() photos: Express.Multer.File[],
-    @Param('id', ParseIntPipe) reportId: number,
-    @Body('json') jsonData: string,
-    @Request() req: any,
-  ) {
-    let imageUrls = [];
-    const parsedJson = JSON.parse(jsonData);
-    const rfDto = plainToInstance(RFDto, parsedJson);
-
-    try {
-      await validateOrReject(rfDto); // Validate the DTO
-    } catch (errors) {
-      throw new BadRequestException('Data not valid');
-    }
-    if (photos != null && photos.length > 0) {
-      // const uploadedImages = await this.googleDriveService.uploadFiles(photos);
-      // imageUrls = uploadedImages.map((img) => img.id);
-    }
-
-    const userId = req.user.sub;
-
-    return this.qcService.updateReport(reportId, rfDto, imageUrls, userId);
-  }
 }
