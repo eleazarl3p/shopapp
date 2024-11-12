@@ -12,8 +12,7 @@ export class CloudmService {
   // Lazy initialize the Google Drive client
   private async initDriveClient() {
     if (!this.driveClient) {
-      // Dynamically import 'googleapis' only when needed
-      //   const { google } = await import('googleapis');
+      const { google } = await import('googleapis');
       //   const auth = new google.auth.GoogleAuth({
       //     keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
       //     scopes: ['https://www.googleapis.com/auth/drive.file'],
