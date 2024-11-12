@@ -55,7 +55,7 @@ dotenv.config();
     TruckModule,
     QcModule,
     SpecialuserModule,
-    GgdrvModule,
+    // GgdrvModule,
   ],
   controllers: [AppController],
   providers: [AppService],
