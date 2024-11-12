@@ -13,14 +13,12 @@ export class CloudmService {
   private async initDriveClient() {
     if (!this.driveClient) {
       // Dynamically import 'googleapis' only when needed
-      const { google } = await import('googleapis');
-
-      const auth = new google.auth.GoogleAuth({
-        keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-        scopes: ['https://www.googleapis.com/auth/drive.file'],
-      });
-
-      this.driveClient = google.drive({ version: 'v3', auth });
+      //   const { google } = await import('googleapis');
+      //   const auth = new google.auth.GoogleAuth({
+      //     keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+      //     scopes: ['https://www.googleapis.com/auth/drive.file'],
+      //   });
+      //   this.driveClient = google.drive({ version: 'v3', auth });
     }
     return this.driveClient;
   }
