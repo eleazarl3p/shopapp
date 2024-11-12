@@ -4,6 +4,6 @@ import { CloudmService } from './cloudm.service';
 
 @Module({
   controllers: [CloudmController],
-  providers: [CloudmService]
+  providers: [CloudmService],
 })
 export class CloudmModule {}
