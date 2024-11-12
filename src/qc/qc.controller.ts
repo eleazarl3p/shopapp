@@ -25,7 +25,7 @@ import { RFDto } from './dto/rf.dto';
 // import { GldriveService } from 'src/gldrive/gldrive.service';
 import { plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
-import { GgdrvService } from 'src/ggdrv/ggdrv.service';
+// import { GgdrvService } from 'src/ggdrv/ggdrv.service';
 
 @Controller('qc')
 @UseGuards(AuthGuard('jwt'))
@@ -33,7 +33,7 @@ export class QcController {
   constructor(
     private readonly qcService: QcService,
     private readonly taskService: TaskService,
-    private readonly googleDriveService: GgdrvService,
+    // private readonly googleDriveService: GgdrvService,
   ) {}
 
   @Get('completed-tasks/:paquete')
