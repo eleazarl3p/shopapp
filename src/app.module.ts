@@ -21,7 +21,6 @@ import { TaskModule } from './task/task.module';
 import { TruckModule } from './truck/truck.module';
 import { SpecialuserModule } from './specialuser/specialuser.module';
 import { QcModule } from './qc/qc.module';
-import { CloudmModule } from './cloudm/cloudm.module';
 
 dotenv.config();
 @Module({
@@ -55,7 +54,6 @@ dotenv.config();
     TruckModule,
     QcModule,
     SpecialuserModule,
-    CloudmModule,
   ],
   controllers: [AppController],
   providers: [AppService],
