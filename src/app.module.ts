@@ -21,7 +21,6 @@ import { TaskModule } from './task/task.module';
 import { TruckModule } from './truck/truck.module';
 import { SpecialuserModule } from './specialuser/specialuser.module';
 import { QcModule } from './qc/qc.module';
-import { GgdrvModule } from './ggdrv/ggdrv.module';
 
 dotenv.config();
 @Module({
