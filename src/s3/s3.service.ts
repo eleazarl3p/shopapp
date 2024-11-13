@@ -19,10 +19,10 @@ export class S3Service {
     this.region = process.env.AWS_S3_REGION;
     this.s3Client = new S3Client({
       region: this.region,
-      //   credentials: {
-      //     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      //     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-      //   },
+      credentials: {
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+      },
     });
   }
   async upload(file: Express.Multer.File, key: string) {
