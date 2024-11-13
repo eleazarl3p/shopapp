@@ -261,7 +261,11 @@ export class QcService {
 
   async createPdfFromHtml(htmlContent: string): Promise<Buffer> {
     // Launch a headless browser
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      timeout: 60000, // Set a longer timeout (in milliseconds)
+    });
     const page = await browser.newPage();
 
     // Set the HTML content of the page
