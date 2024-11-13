@@ -50,4 +50,34 @@ export class S3Service {
       throw error;
     }
   }
+
+  // Upload PDF to S3
+  async uploadPdfToS3(
+    pdfBuffer: Buffer,
+
+    key: string,
+  ): Promise<any> {
+    const bucket = process.env.S3_BUCKET;
+    const input: PutObjectCommandInput = {
+      Body: pdfBuffer,
+      Bucket: bucket,
+      Key: key,
+      ContentType: 'application/pdf',
+      ACL: 'public-read',
+    };
+
+    try {
+      const response: PutBucketAclCommandOutput = await this.s3Client.send(
+        new PutObjectCommand(input),
+      );
+
+      if (response.$metadata.httpStatusCode == 200) {
+        return `https://${bucket}.s3.${this.region}.amazonaws.com/${key}`;
+      }
+      throw new Error('image not save to s3!');
+    } catch (error) {
+      this.logger.error('Cannot save file inside s3', error);
+      throw error;
+    }
+  }
 }

@@ -16,6 +16,7 @@ import { InspectionCriteria } from './entity/inspection-criteria.entity';
 // import puppeteer from 'puppeteer';
 import { writeFileSync } from 'fs';
 import { S3Service } from 'src/s3/s3.service';
+import puppeteer from 'puppeteer';
 
 @Injectable()
 export class QcService {
@@ -237,14 +238,19 @@ export class QcService {
 
         const html = this.genHtml(rep, questions, answers, photos);
 
-        // const pdfBuffer = await this.createPdfFromHtml(html);
+        const pdfBuffer = await this.createPdfFromHtml(html);
+
+        const key = `report${rfId}${Date.now()}`;
+        const url = await this.s3Service.uploadPdfToS3(pdfBuffer, key);
+        console.log('url : ', url);
+        return url;
         // const fileId = await this.googleDriveService.uploadPdfToDrive(
         //   pdfBuffer,
         //   `Report ${Date()} ${rfId} - ${material['piecemark']}`,
         // );
 
         // return fileId;
-        return '';
+        //return '';
       }
 
       return '';
@@ -253,28 +259,28 @@ export class QcService {
     }
   }
 
-  // async createPdfFromHtml(htmlContent: string): Promise<Buffer> {
-  //   // Launch a headless browser
-  //   // const browser = await puppeteer.launch();
-  //   const page = await browser.newPage();
+  async createPdfFromHtml(htmlContent: string): Promise<Buffer> {
+    // Launch a headless browser
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
 
-  //   // Set the HTML content of the page
-  //   await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    // Set the HTML content of the page
+    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
 
-  //   // Generate the PDF
-  //   const pdfUint8Array = await page.pdf({
-  //     format: 'Letter',
-  //     printBackground: true,
-  //   });
+    // Generate the PDF
+    const pdfUint8Array = await page.pdf({
+      format: 'Letter',
+      printBackground: true,
+    });
 
-  //   // Save the PDF to a file
-  //   writeFileSync('styled-output.pdf', pdfUint8Array);
+    // Save the PDF to a file
+    writeFileSync('styled-output.pdf', pdfUint8Array);
 
-  //   // Close the browser
-  //   await browser.close();
+    // Close the browser
+    await browser.close();
 
-  //   return Buffer.from(pdfUint8Array);
-  // }
+    return Buffer.from(pdfUint8Array);
+  }
 
   genHtml(
     inspection: MaterialInspection,
@@ -376,13 +382,13 @@ export class QcService {
       <!-- DATA -->
       <div class="two-columns">
         <div class="info">
-          <p>Job</p>
+          <p>Job:</p>
           <p>Piecemark:</p>
           <p>Type of Inspection</p>
           <p>Inspector:</p>
           <p>Fabricator:</p>
           <p>Non Conformance:</p>
-          <p>Fit-Up Inspection</p>
+          <p>Fit-Up Inspection:</p>
         </div>
         <div>
           <p>${inspection.job}</p>
@@ -407,6 +413,14 @@ export class QcService {
         </div>
       </div>
 
+      <!-- COMMENTS - Start on a new page -->
+      <div class=${inspection.comments.length > 1 ? 'cp' : ''}>
+        <h2>${inspection.comments.length > 1 ? 'Comments' : ''} </h2>
+        <p>
+          ${inspection.comments}
+        </p>
+      </div>
+
       <!-- PICTURES - Two pictures per page, one top, one bottom -->
       <div class="pictures">
     
@@ -427,13 +441,6 @@ export class QcService {
          }
       </div>
 
-      <!-- COMMENTS - Start on a new page -->
-      <div class=${inspection.comments.length > 1 ? 'comments-page' : ''}>
-        <h2>${inspection.comments.length > 1 ? 'Comments' : ''} </h2>
-        <p>
-          ${inspection.comments}
-        </p>
-      </div>
     </div>
   </body>
 </html>
