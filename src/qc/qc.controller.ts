@@ -98,6 +98,18 @@ export class QcController {
     return this.taskService.failedCutMaterials(paqueteId);
   }
 
+  @Post('submit-form')
+  @UseInterceptors(
+    FilesInterceptor('photos', 5, {
+      fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+          cb(null, true);
+        } else {
+          cb(new Error('Invalid file type, only images are allowed!'), false);
+        }
+      },
+    }),
+  )
   async submitFormReview(
     @UploadedFiles() photos: Express.Multer.File[],
     @Query('piecemarks') piecemarks: string,
@@ -106,10 +118,12 @@ export class QcController {
   ) {
     let imageUrls = [];
 
-    // if (photos != null && photos.length > 0) {
-    //   // const uploadedImages = await this.googleDriveService.uploadFiles(photos);
-    //   // imageUrls = uploadedImages.map((img) => img.id);
-    // }
+    if (photos != null && photos.length > 0) {
+      //const uploadedImages = await this.googleDriveService.uploadFiles(photos);
+      // imageUrls = uploadedImages.map((img) => img.id);
+
+      imageUrls = await this.qcService.uploadPhotos(photos);
+    }
 
     if (piecemarks == 'materials') {
       const parsedJson = JSON.parse(jsonData);
@@ -118,7 +132,7 @@ export class QcController {
       try {
         await validateOrReject(rfDto); // Validate the DTO
       } catch (errors) {
-        console.log('invalid');
+        console.log('invalid', errors);
         throw new BadRequestException('Data not valid');
       }
       const userId = req.user.sub;
@@ -154,11 +168,49 @@ export class QcController {
     return this.taskService.getReports(paqueteId);
   }
 
-  @Post('test')
-  @UseInterceptors(FilesInterceptor('photos'))
-  async testAwsUpload(@UploadedFiles() photos: Express.Multer.File[]) {
-    this.qcService.testS3W(photos);
+  // QC update report
+  @Patch('report/:id')
+  @UseInterceptors(
+    FilesInterceptor('photos', 5, {
+      fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+          cb(null, true);
+        } else {
+          cb(new Error('Invalid file type, only images are allowed!'), false);
+        }
+      },
+    }),
+  )
+  async updateFormReview(
+    @UploadedFiles() photos: Express.Multer.File[],
+    @Param('id', ParseIntPipe) reportId: number,
+    @Body('json') jsonData: string,
+    @Request() req: any,
+  ) {
+    let imageUrls = [];
+    const parsedJson = JSON.parse(jsonData);
+    const rfDto = plainToInstance(RFDto, parsedJson);
+
+    try {
+      await validateOrReject(rfDto); // Validate the DTO
+    } catch (errors) {
+      throw new BadRequestException('Data not valid');
+    }
+    if (photos != null && photos.length > 0) {
+      //const uploadedImages = await this.googleDriveService.uploadFiles(photos);
+
+      imageUrls = await this.qcService.uploadPhotos(photos); // uploadedImages.map((img) => img.id);
+    }
+
+    const userId = req.user.sub;
+
+    return this.qcService.updateReport(reportId, rfDto, imageUrls, userId);
   }
+  // @Post('test')
+  // @UseInterceptors(FilesInterceptor('photos'))
+  // async testAwsUpload(@UploadedFiles() photos: Express.Multer.File[]) {
+  //   this.qcService.testS3W(photos);
+  // }
   // // // QC update report
   // // @Patch('report/:id')
   // // updateReport(

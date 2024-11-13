@@ -16,7 +16,7 @@ import { InspectionCriteria } from './entity/inspection-criteria.entity';
 // import puppeteer from 'puppeteer';
 import { writeFileSync } from 'fs';
 import { S3Service } from 'src/s3/s3.service';
-import { url } from 'inspector';
+
 @Injectable()
 export class QcService {
   constructor(
@@ -33,8 +33,6 @@ export class QcService {
     private readonly taskService: TaskService,
 
     private readonly s3Service: S3Service,
-
-    // private readonly googleDriveService: GldriveService,
   ) {}
 
   async pendingJobs() {
@@ -176,11 +174,14 @@ export class QcService {
     if (!inspection) {
       throw new NotFoundException();
     }
-
-    for (const photoId of photos) {
-      try {
-        // await this.googleDriveService.deleteFile(photoId); // Remove from Google Drive
-      } catch (error) {}
+    if (photos) {
+      for (const photo of photos) {
+        try {
+          console.log('ph', photo);
+        } catch (error) {
+          console.log('error -> ', error);
+        }
+      }
     }
 
     //rfDto.photos = imageUrls;
@@ -222,89 +223,17 @@ export class QcService {
           },
         });
 
-        const material = rest['materials'][0];
+        //const material = rest['materials'][0];
         const questions = rep.criteriaAnswers.map(
           (cr) => `<p class="questions">${cr.criteria.question}</p>`,
         );
         const answers = rep.criteriaAnswers.map(
           (an) => `<p class="questions">${an.answer}</p>`,
         );
-
+        //`<img src="https://drive.google.com/thumbnail?id=${ph_id}&sz=w10000" alt="material image" />`
         const photos = rep.photos.map(
-          (ph_id) =>
-            `<img src="https://drive.google.com/thumbnail?id=${ph_id}&sz=w10000" alt="material image" />`,
+          (url) => `<img src="${url}" alt="material image" />`,
         );
-        //         const html = `
-        //               <!DOCTYPE html>
-        //               <html lang="en">
-        //               <head>
-        //                 <meta charset="UTF-8">
-        //                 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        //                 <title>PDF Example</title>
-        //                 <style>
-        //                   body {
-        //                     font-family: Arial, sans-serif;
-        //                     margin: 0;
-        //                     padding: 20px;
-        //                     background-color: #f9f9f9;
-        //                   }
-        //                   h1 {
-        //                     color: #333;
-        //                     text-align: center;
-        //                   }
-        //                   p {
-        //                     font-size: 14px;
-        //                     line-height: 1.5;
-        //                     color: #555;
-        //                   }
-        //                   .content {
-        //                     background-color: #fff;
-        //                     padding: 20px;
-        //                     border-radius: 8px;
-        //                     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        //                   }
-        //                     .column {
-        //                       display : flex;
-        //                       gap: 10px;
-        //                     }
-        //                 </style>
-        //               </head>
-        //               <body>
-        //                 <div class="main">
-        //     <div class="column">
-        //       <div>
-        //         <p>Job:</p>
-        //         <p>Piecemark:</p>
-        //         <p>Non Conformance:</p>
-        //         <p>Fabricator:</p>
-        //         <p>Inspector:</p>
-        //       </div>
-        //       <div>
-        //         <p>${rep.job}</p>
-        //         <p>${rep['piecemark']}</p>
-        //         <p>${rep.non_conformance ? 'Yes' : 'No'}</p>
-        //         <p>${rep.fabricator.name}</p>
-        //         <p>${rep.inspector.name}</p>
-        //       </div>
-        //     </div>
-
-        //     <h4>Inspection Criteria:</h4>
-        //   <div class="column">
-        //     <div>
-        //         ${questions.map((i) => i).join(' ')}
-        //     </div>
-        //     <div>
-        //       ${answers.map((i) => i).join(' ')}
-        //     </div>
-        //   </div>
-
-        //   <h3>Comment</h3>
-        //   <p>${rest.comments}</p>
-
-        // </div>
-        //               </body>
-        //               </html>
-        //               `;
 
         const html = this.genHtml(rep, questions, answers, photos);
 
@@ -513,7 +442,7 @@ export class QcService {
     return html;
   }
 
-  async testS3W(photos: Express.Multer.File[]) {
+  async uploadPhotos(photos: Express.Multer.File[]): Promise<string[]> {
     const urls = [];
 
     for (const file of photos) {
@@ -523,6 +452,6 @@ export class QcService {
       urls.push(imageUrl);
     }
 
-    console.log(urls);
+    return urls;
   }
 }
