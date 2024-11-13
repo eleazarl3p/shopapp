@@ -15,6 +15,8 @@ import { InspectionCriteria } from './entity/inspection-criteria.entity';
 // pdf
 // import puppeteer from 'puppeteer';
 import { writeFileSync } from 'fs';
+import { S3Service } from 'src/s3/s3.service';
+import { url } from 'inspector';
 @Injectable()
 export class QcService {
   constructor(
@@ -29,6 +31,8 @@ export class QcService {
 
     private readonly jobService: JobService,
     private readonly taskService: TaskService,
+
+    private readonly s3Service: S3Service,
 
     // private readonly googleDriveService: GldriveService,
   ) {}
@@ -507,5 +511,18 @@ export class QcService {
 `;
 
     return html;
+  }
+
+  async testS3W(photos: Express.Multer.File[]) {
+    const urls = [];
+
+    for (const file of photos) {
+      const key = `${file.fieldname}${Date.now()}`;
+      const imageUrl = await this.s3Service.upload(file, key);
+
+      urls.push(imageUrl);
+    }
+
+    console.log(urls);
   }
 }

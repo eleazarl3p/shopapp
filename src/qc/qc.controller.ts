@@ -25,6 +25,7 @@ import { RFDto } from './dto/rf.dto';
 // import { GldriveService } from 'src/gldrive/gldrive.service';
 import { plainToInstance } from 'class-transformer';
 import { validateOrReject } from 'class-validator';
+import { FilesInterceptor } from '@nestjs/platform-express';
 // import { GgdrvService } from 'src/ggdrv/ggdrv.service';
 
 @Controller('qc')
@@ -153,6 +154,11 @@ export class QcController {
     return this.taskService.getReports(paqueteId);
   }
 
+  @Post('test')
+  @UseInterceptors(FilesInterceptor('photos'))
+  async testAwsUpload(@UploadedFiles() photos: Express.Multer.File[]) {
+    this.qcService.testS3W(photos);
+  }
   // // // QC update report
   // // @Patch('report/:id')
   // // updateReport(

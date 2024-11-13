@@ -10,6 +10,7 @@ import {
   MemberInspection,
 } from './entity/inspection.entity';
 import { InspectionCriteria } from './entity/inspection-criteria.entity';
+import { S3Module } from 'src/s3/s3.module';
 // import { GgdrvModule } from 'src/ggdrv/ggdrv.module';
 // import { GldriveModule } from 'src/gldrive/gldrive.module';
 
@@ -23,6 +24,7 @@ import { InspectionCriteria } from './entity/inspection-criteria.entity';
     ]),
     TaskModule,
     JobModule,
+    S3Module,
     // GgdrvModule,
   ],
   controllers: [QcController],

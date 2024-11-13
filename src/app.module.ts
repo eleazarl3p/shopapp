@@ -21,6 +21,8 @@ import { TaskModule } from './task/task.module';
 import { TruckModule } from './truck/truck.module';
 import { SpecialuserModule } from './specialuser/specialuser.module';
 import { QcModule } from './qc/qc.module';
+import { ConfigModule } from '@nestjs/config';
+import { S3Module } from './s3/s3.module';
 
 dotenv.config();
 @Module({
@@ -37,6 +39,7 @@ dotenv.config();
       synchronize: true,
       timezone: 'Z',
     }),
+    ConfigModule.forRoot({ isGlobal: true }),
     JobModule,
     PaqueteModule,
     MaterialModule,
@@ -54,6 +57,8 @@ dotenv.config();
     TruckModule,
     QcModule,
     SpecialuserModule,
+
+    S3Module,
   ],
   controllers: [AppController],
   providers: [AppService],
