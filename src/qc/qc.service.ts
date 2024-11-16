@@ -163,14 +163,7 @@ export class QcService {
       where: { _id: rfId },
       relations: { inspector: true, fabricator: true, criteriaAnswers: true },
     });
-    const {
-      criteria_answers,
-      photos,
-      inspector,
-      fabricator,
-
-      ...rest
-    } = rfDto;
+    const { criteria_answers, photos, inspector, fabricator, ...rest } = rfDto;
 
     if (!inspection) {
       throw new NotFoundException();
@@ -242,7 +235,9 @@ export class QcService {
 
         const key = `report${rfId}${Date.now()}`;
         const url = await this.s3Service.uploadPdfToS3(pdfBuffer, key);
-        console.log('url : ', url);
+        //console.log('url : ', url);
+
+        await this.matInsRepo.update({ _id: rfId }, { report_link: url });
         return url;
         // const fileId = await this.googleDriveService.uploadPdfToDrive(
         //   pdfBuffer,

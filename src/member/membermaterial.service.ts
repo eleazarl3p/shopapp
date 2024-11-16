@@ -3,7 +3,6 @@ import { MemberMaterial } from './entities/membermaterial.entity';
 import { Repository } from 'typeorm';
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { TaskService } from 'src/task/task.service';
-import { CutHistory } from 'src/task/entities/cut-history.entity';
 
 @Injectable()
 export class MemberMaterialService {
@@ -43,7 +42,15 @@ export class MemberMaterialService {
       where: { material_id },
       relations: {
         member: {
-          tasks: { items: { cut_history: { user: true }, material: true } },
+          tasks: {
+            items: {
+              cut_history: {
+                user: true,
+                inspection: true,
+              },
+              material: true,
+            },
+          },
         },
         material: true,
       },
@@ -62,6 +69,7 @@ export class MemberMaterialService {
               return {
                 ...ct,
                 user: ct.user ? ct.user.fullname() : '..9.',
+                inspection_link: ct.inspection ? ct.inspection.report_link : '',
               };
             });
           });
