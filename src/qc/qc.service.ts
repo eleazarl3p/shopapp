@@ -423,7 +423,7 @@ export class QcService {
       <!-- PICTURES - Two pictures per page, one top, one bottom -->
       <div class="pictures">
     
-        <div class="picture-page">
+        <div class=${photos.length > 0 ? 'picture-page' : ''}>
           ${photos.length > 0 ? photos[0] : ''}
 
           ${photos.length > 1 ? photos[1] : ''}
