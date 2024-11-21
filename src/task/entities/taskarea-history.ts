@@ -1,6 +1,7 @@
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
   Entity,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -33,6 +34,9 @@ export class TaskAreaHistory extends BaseEntity {
     onDelete: 'CASCADE',
   })
   task_area: TaskArea;
+
+  @CreateDateColumn({ type: 'datetime' })
+  created_at: Date;
 
   @UpdateDateColumn({ type: 'datetime' })
   date_approval: Date;

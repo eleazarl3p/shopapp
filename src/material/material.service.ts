@@ -44,7 +44,57 @@ export class MaterialService {
       }),
     );
 
-    return m.map((obj) => Object.values(obj)[0]);
+    return m.map((obj) => {
+      const result = Object.values(obj)[0];
+
+      //return result;
+      const reducedData = Object.values(
+        result.cut_history.reduce(
+          (acc, item) => {
+            // Normalize created_at to a date string (e.g., "YYYY-MM-DD")
+            const createdAtDate = new Date(item.created_at);
+            // .toISOString()
+            // .split('T');
+
+            const key = `${createdAtDate}`;
+            if (!acc[key]) {
+              acc[key] = {
+                _id: item._id,
+                quantity: 0,
+                approved: 0,
+                comments: '',
+                review_date: item.review_date,
+                created_at: item.created_at,
+                user: item.user,
+                inspection_link: [],
+                machine: item.machine,
+              };
+            }
+
+            // Aggregate values
+            acc[key].quantity += item.quantity;
+            acc[key].approved += item.approved ? item.approved : 0;
+            if (item.inspection_link.length > 5) {
+              acc[key].inspection_link.push(item.inspection_link);
+            }
+            return acc;
+          },
+          {} as Record<string, any>,
+        ),
+      );
+
+      // Sort by created_date (ascending)
+      reducedData.sort(
+        (a, b) =>
+          new Date(a['created_date']).getTime() -
+          new Date(b['created_date']).getTime(),
+      );
+
+      return {
+        ...result,
+        cut_history: reducedData,
+      };
+    });
   }
 
   async find(barcode: string): Promise<Material> {

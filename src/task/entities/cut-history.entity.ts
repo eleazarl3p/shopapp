@@ -28,8 +28,8 @@ export class CutHistory extends BaseEntity {
   @Column({ default: '' })
   comments: string;
 
-  @UpdateDateColumn({ type: 'datetime' })
-  last_update: Date;
+  @UpdateDateColumn({ type: 'datetime', nullable: true })
+  review_date: Date;
 
   @ManyToOne(() => TaskItem, (ti) => ti.cut_history, {
     onDelete: 'CASCADE',

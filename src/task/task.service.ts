@@ -159,9 +159,15 @@ export class TaskService {
   }
 
   async cutTaskItems(cutItemDtos: CutItemDto[], userId: number) {
+    const created_at = new Date();
+
     for (const { _id, quantity } of cutItemDtos) {
       try {
-        const cutting = this.cutHistoryRepo.create({ quantity });
+        const cutting = this.cutHistoryRepo.create({
+          quantity,
+          created_at,
+          review_date: null,
+        });
         cutting.task_item = { _id } as TaskItem;
         cutting.user = { _id: userId } as User;
 
@@ -297,6 +303,7 @@ export class TaskService {
 
     const tasks = this.formatTaskItems(itms);
     // return tasks.filter((t) => t.member.piecemark == '13B1');
+    //return tasks;
     if (all) return tasks;
     return tasks
       .map((tsk) => {
@@ -304,7 +311,7 @@ export class TaskService {
           (acc, c) => (acc += c.quantity),
           0,
         );
-
+        console.log(totalCut);
         if (tsk.member.materials[0].quantity > totalCut) {
           return tsk;
         }
@@ -564,6 +571,7 @@ export class TaskService {
     areaId: number,
     userId: number,
   ) {
+    const review_date = new Date();
     for (const { task_id, cutDtos } of cutTaskItemDtos) {
       if (cutDtos.some((item) => item.quantity > 0)) {
         try {
@@ -582,7 +590,11 @@ export class TaskService {
       for (const { _id, quantity } of cutDtos) {
         await this.cutHistoryRepo.update(
           { _id },
-          { approved: quantity, reviewed_by: { _id: userId } as User },
+          {
+            approved: quantity,
+            reviewed_by: { _id: userId } as User,
+            review_date,
+          },
         );
       }
     }

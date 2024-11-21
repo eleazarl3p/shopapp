@@ -47,6 +47,7 @@ export class MemberMaterialService {
               cut_history: {
                 user: true,
                 inspection: true,
+                task_item: { machine: true },
               },
               material: true,
             },
@@ -66,11 +67,15 @@ export class MemberMaterialService {
           );
           return itm.flatMap((c) => {
             return c.cut_history.map((ct) => {
-              return {
+              const ht = {
                 ...ct,
                 user: ct.user ? ct.user.fullname() : '..9.',
                 inspection_link: ct.inspection ? ct.inspection.report_link : '',
+                machine: ct.task_item.machine.name,
               };
+
+              const { inspection, task_item, ...all } = ht;
+              return all;
             });
           });
         }),

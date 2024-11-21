@@ -169,6 +169,7 @@ export class MemberService {
     // }
 
     //member.member_material = Object.values(groupedMaterials);
+
     const newMember = {
       _id: member._id,
       barcode: member.barcode,
@@ -185,42 +186,65 @@ export class MemberService {
               .flatMap((ta) => {
                 return ta.history
                   .map((h) => {
-                    if (h.approved) {
-                      return {
-                        area: ta.area.name,
-                        user: h.user.fullname(),
-                        reviewed_by:
-                          h.reviewed_by != null ? h.reviewed_by.fullname() : '',
-                        date_of_approval: h.date_approval,
-                      };
-                    }
+                    const t1 = new Date(h.created_at).getTime();
+                    const t2 = new Date(h.date_approval).getTime();
+
+                    // if (h.approved) {
+                    return {
+                      area: ta.area.name,
+                      user: h.user.fullname(),
+                      reviewed_by:
+                        h.reviewed_by != null ? h.reviewed_by.fullname() : '',
+                      date_of_approval: t1 != t2 ? h.date_approval : null,
+                      created_at: h.created_at,
+                      quantity: h.completed,
+                      approved: h.approved,
+                    };
+                    // }
                   })
                   .filter(Boolean);
               })
               .reduce(
                 (acc, h) => {
-                  if (!acc[h.area]) {
-                    acc[h.area] = {
+                  // Normalize created_at to a date string (e.g., "YYYY-MM-DD")
+                  const createdAtDate = new Date(h.created_at)
+                    .toISOString()
+                    .split('T')[0];
+
+                  // Create a unique key combining area and normalized created_at
+                  const key = `${h.area}-${createdAtDate}`;
+
+                  if (!acc[key]) {
+                    acc[key] = {
                       area: h.area,
                       user: h.user,
                       reviewed_by: h.reviewed_by,
                       date_of_approval: h.date_of_approval,
                       quantity: 0,
+                      created_at: h.created_at,
+                      approved: 0,
                     };
                   }
 
-                  acc[h.area].quantity += 1;
-                  const dateA = new Date(
-                    acc[h.area].date_of_approval,
-                  ).getTime();
-                  const dateB = new Date(h.date_of_approval).getTime();
-                  if (dateA < dateB)
-                    acc[h.area].date_of_approval = h.date_of_approval;
+                  // Aggregate the data
+                  acc[key].quantity += 1;
+                  acc[key].approved += h.approved ? h.approved : 0;
+
+                  // Update the latest date_of_approval
+                  const dAp1 = new Date(acc[key].date_of_approval).getTime();
+                  const dAp2 = new Date(h.date_of_approval).getTime();
+                  if (dAp1 < dAp2) {
+                    acc[key].date_of_approval = h.date_of_approval;
+                  }
 
                   return acc;
                 },
                 {} as Record<string, any>,
               ),
+          ).sort(
+            (a, b) =>
+              new Date(a.created_at).getTime() -
+              new Date(b.created_at).getTime(),
           ),
     };
     // Object.values(
