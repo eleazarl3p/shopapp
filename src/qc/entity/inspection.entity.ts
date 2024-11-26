@@ -79,6 +79,9 @@ export class MemberInspection {
   @Column({ type: 'boolean', default: false })
   non_conformance: boolean;
 
+  @Column({ type: 'boolean', default: false })
+  completed: boolean;
+
   @ManyToOne(() => SpecialUser)
   inspector: SpecialUser;
 

@@ -98,6 +98,12 @@ export class QcController {
     return this.taskService.failedCutMaterials(paqueteId);
   }
 
+  // QC get list of failed materials
+  @Get('failed-tasks/:paquete')
+  async failedTasks(@Param('paquete', ParseIntPipe) paqueteId: number) {
+    return this.taskService.qcFailedMembers(paqueteId);
+  }
+
   @Post('submit-form')
   @UseInterceptors(
     FilesInterceptor('photos', 5, {
@@ -125,23 +131,24 @@ export class QcController {
       imageUrls = await this.qcService.uploadPhotos(photos);
     }
 
+    const parsedJson = JSON.parse(jsonData);
+    const rfDto = plainToInstance(RFDto, parsedJson);
+    //console.log(imageUrls);
+    try {
+      await validateOrReject(rfDto); // Validate the DTO
+    } catch (errors) {
+      console.log('invalid', errors);
+      throw new BadRequestException('Data not valid');
+    }
+    const userId = req.user.sub;
+    rfDto.photos = imageUrls;
+
     if (piecemarks == 'materials') {
-      const parsedJson = JSON.parse(jsonData);
-      const rfDto = plainToInstance(RFDto, parsedJson);
-      //console.log(imageUrls);
-      try {
-        await validateOrReject(rfDto); // Validate the DTO
-      } catch (errors) {
-        console.log('invalid', errors);
-        throw new BadRequestException('Data not valid');
-      }
-      const userId = req.user.sub;
-      rfDto.photos = imageUrls;
       await this.qcService.submitFormTaskItem(rfDto, userId);
 
       return imageUrls;
     } else if (piecemarks == 'members') {
-      console.log('member');
+      await this.qcService.submitFormTaskArea(rfDto, userId);
     } else {
       console.log(piecemarks);
     }
@@ -163,13 +170,18 @@ export class QcController {
   //     console.log(piecemarks);
   //   }
   // }
-  @Get('reports/:paquete')
-  reports(@Param('paquete', ParseIntPipe) paqueteId: number) {
-    return this.taskService.getReports(paqueteId);
+  @Get('inspections/materials/:paquete')
+  materialReports(@Param('paquete', ParseIntPipe) paqueteId: number) {
+    return this.taskService.getMaterialsReports(paqueteId);
+  }
+
+  @Get('inspections/members/:paquete')
+  memberReports(@Param('paquete', ParseIntPipe) paqueteId: number) {
+    return this.taskService.getMembersReports(paqueteId);
   }
 
   // QC update report
-  @Patch('report/:id')
+  @Patch('inspection/material/:id')
   @UseInterceptors(
     FilesInterceptor('photos', 5, {
       fileFilter: (req, file, cb) => {
@@ -181,7 +193,7 @@ export class QcController {
       },
     }),
   )
-  async updateFormReview(
+  async updateFormReviewMaterial(
     @UploadedFiles() photos: Express.Multer.File[],
     @Param('id', ParseIntPipe) reportId: number,
     @Body('json') jsonData: string,
@@ -204,8 +216,57 @@ export class QcController {
 
     const userId = req.user.sub;
 
-    return this.qcService.updateReport(reportId, rfDto, imageUrls, userId);
+    return this.qcService.updateReportMaterial(
+      reportId,
+      rfDto,
+      imageUrls,
+      userId,
+    );
   }
+
+  @Patch('inspection/member/:id')
+  @UseInterceptors(
+    FilesInterceptor('photos', 5, {
+      fileFilter: (req, file, cb) => {
+        if (file.mimetype.startsWith('image/')) {
+          cb(null, true);
+        } else {
+          cb(new Error('Invalid file type, only images are allowed!'), false);
+        }
+      },
+    }),
+  )
+  async updateFormReviewMember(
+    @UploadedFiles() photos: Express.Multer.File[],
+    @Param('id', ParseIntPipe) reportId: number,
+    @Body('json') jsonData: string,
+    @Request() req: any,
+  ) {
+    let imageUrls = [];
+    const parsedJson = JSON.parse(jsonData);
+    const rfDto = plainToInstance(RFDto, parsedJson);
+
+    try {
+      await validateOrReject(rfDto); // Validate the DTO
+    } catch (errors) {
+      throw new BadRequestException('Data not valid');
+    }
+    if (photos != null && photos.length > 0) {
+      //const uploadedImages = await this.googleDriveService.uploadFiles(photos);
+
+      imageUrls = await this.qcService.uploadPhotos(photos); // uploadedImages.map((img) => img.id);
+    }
+
+    const userId = req.user.sub;
+
+    return this.qcService.updateReportMember(
+      reportId,
+      rfDto,
+      imageUrls,
+      userId,
+    );
+  }
+
   // @Post('test')
   // @UseInterceptors(FilesInterceptor('photos'))
   // async testAwsUpload(@UploadedFiles() photos: Express.Multer.File[]) {

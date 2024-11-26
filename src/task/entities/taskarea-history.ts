@@ -3,12 +3,15 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { TaskArea } from './taskarea.entity';
 import { User } from 'src/user/entities/user.entity';
+import { MemberInspection } from 'src/qc/entity/inspection.entity';
 
 @Entity()
 export class TaskAreaHistory extends BaseEntity {
@@ -35,9 +38,13 @@ export class TaskAreaHistory extends BaseEntity {
   })
   task_area: TaskArea;
 
+  @OneToOne(() => MemberInspection)
+  @JoinColumn()
+  inspection: MemberInspection;
+
   @CreateDateColumn({ type: 'datetime' })
   created_at: Date;
 
-  @UpdateDateColumn({ type: 'datetime' })
+  @UpdateDateColumn({ type: 'datetime', nullable: true })
   date_approval: Date;
 }

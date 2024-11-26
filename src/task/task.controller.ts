@@ -69,6 +69,11 @@ export class TaskController {
     return await this.taskService.jobMachineTask(machine_id, job_id);
   }
 
+  @Get('failed-tasks/:paquete')
+  async failedTasks(@Param('paquete', ParseIntPipe) paquete_id: number) {
+    return await this.taskService.qcFailedMembers(paquete_id);
+  }
+
   // @Get('fully-cut-tasks/:paquete')
   // async fullyCutTasks(@Param('paquete', ParseIntPipe) paqueteId: number) {
   //   return await this.taskService.fullyCutTasks(paqueteId);

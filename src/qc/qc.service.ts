@@ -17,6 +17,7 @@ import { InspectionCriteria } from './entity/inspection-criteria.entity';
 import { writeFileSync } from 'fs';
 import { S3Service } from 'src/s3/s3.service';
 import puppeteer from 'puppeteer';
+import { TaskArea } from 'src/task/entities/taskarea.entity';
 
 @Injectable()
 export class QcService {
@@ -90,7 +91,7 @@ export class QcService {
               if (materials_to_review.length) {
                 return pq;
               } else {
-                const tasks_to_review = await this.taskService.qcFailedTasks(
+                const tasks_to_review = await this.taskService.qcFailedMembers(
                   pq._id,
                 );
 
@@ -153,7 +154,142 @@ export class QcService {
     }
   }
 
-  async updateReport(
+  async submitFormTaskArea(rfDto: RFDto, userId: number) {
+    const { criteria_answers, ids, inspector, fabricator, ...rest } = rfDto;
+
+    for (const _id of ids) {
+      try {
+        const meminsp = this.memInsRepo.create({
+          ...rest,
+          inspector: { _id: inspector._id } as SpecialUser,
+          fabricator: { _id: fabricator._id } as SpecialUser,
+          task_area: { _id } as TaskArea,
+        });
+
+        const toSaveAnswer = [];
+        for (const cia of criteria_answers) {
+          const ipc = this.inspectionCriteriaRepo.create({
+            criteria: { _id: cia.criteria._id },
+            answer: cia.answer,
+          });
+
+          toSaveAnswer.push(ipc);
+        }
+
+        const crAns = await this.inspectionCriteriaRepo.save(toSaveAnswer);
+        meminsp.criteriaAnswers = crAns;
+
+        const inspection = await this.memInsRepo.save(meminsp);
+
+        await this.taskService.qcInspectTareaHistory(_id, inspection);
+      } catch (error) {
+        console.log(error, 'error');
+      }
+    }
+  }
+
+  async updateReportMaterial(
+    rfId: number,
+    rfDto: RFDto,
+    imageUrls: any,
+    userId: number,
+  ): Promise<string> {
+    const inspection = await this.matInsRepo.findOne({
+      where: { _id: rfId },
+      relations: { inspector: true, fabricator: true, criteriaAnswers: true },
+    });
+    const { criteria_answers, photos, inspector, fabricator, ...rest } = rfDto;
+
+    if (!inspection) {
+      throw new NotFoundException();
+    }
+    if (photos) {
+      for (const photo of photos) {
+        try {
+          console.log('ph', photo);
+        } catch (error) {
+          console.log('error -> ', error);
+        }
+      }
+    }
+
+    //rfDto.photos = imageUrls;
+    try {
+      await this.matInsRepo.update(
+        { _id: rfId },
+        {
+          inspection_type: rest.inspection_type,
+          comments: rest.comments,
+          fit_up_inspection: rest.fit_up_inspection,
+          non_conformance: rest.non_conformance,
+          inspector: { _id: inspector._id },
+          fabricator: { _id: fabricator._id },
+          photos: imageUrls,
+          completed: rest.completed,
+        },
+      );
+
+      for (const ca of inspection.criteriaAnswers) {
+        const crA = criteria_answers.filter((c) => c['_id'] == ca._id);
+        if (crA.length > 0) {
+          const result = crA.pop();
+          await this.inspectionCriteriaRepo.update(
+            {
+              _id: ca._id,
+            },
+            { answer: result.answer },
+          );
+        }
+      }
+
+      if (rest.completed) {
+        const rep = await this.matInsRepo.findOne({
+          where: { _id: rfId },
+          relations: {
+            inspector: true,
+            fabricator: true,
+            criteriaAnswers: { criteria: true },
+          },
+        });
+
+        //const material = rest['materials'][0];
+        const questions = rep.criteriaAnswers.map(
+          (cr) => `<p class="questions">${cr.criteria.question}</p>`,
+        );
+        const answers = rep.criteriaAnswers.map(
+          (an) => `<p class="questions">${an.answer}</p>`,
+        );
+        //`<img src="https://drive.google.com/thumbnail?id=${ph_id}&sz=w10000" alt="material image" />`
+        const photos = rep.photos.map(
+          (url) => `<img src="${url}" alt="material image" />`,
+        );
+
+        const html = this.genHtml(rep, questions, answers, photos);
+
+        const pdfBuffer = await this.createPdfFromHtml(html);
+
+        const key = `report${rfId}${Date.now()}`;
+        const url = await this.s3Service.uploadPdfToS3(pdfBuffer, key);
+        //console.log('url : ', url);
+
+        await this.matInsRepo.update({ _id: rfId }, { report_link: url });
+        return url;
+        // const fileId = await this.googleDriveService.uploadPdfToDrive(
+        //   pdfBuffer,
+        //   `Report ${Date()} ${rfId} - ${material['piecemark']}`,
+        // );
+
+        // return fileId;
+        //return '';
+      }
+
+      return '';
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async updateReportMember(
     rfId: number,
     rfDto: RFDto,
     imageUrls: any,

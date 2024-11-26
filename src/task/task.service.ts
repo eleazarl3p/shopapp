@@ -26,7 +26,10 @@ import { TaskAreaHistory } from './entities/taskarea-history';
 import { DeleteTaskDto } from './dto/delete-task.dto';
 import { JobService } from 'src/job/job.service';
 import { User } from 'src/user/entities/user.entity';
-import { MaterialInspection } from 'src/qc/entity/inspection.entity';
+import {
+  MaterialInspection,
+  MemberInspection,
+} from 'src/qc/entity/inspection.entity';
 import { RFDto } from 'src/qc/dto/rf.dto';
 import e from 'express';
 import { error } from 'console';
@@ -518,7 +521,7 @@ export class TaskService {
     });
   }
 
-  async qcFailedTasks(paqueteId: number) {
+  async qcFailedMembers(paqueteId: number) {
     const tasks = await this.taskAreaHistoryRepo.find({
       where: {
         task_area: { task: { member: { paquete: { _id: paqueteId } } } },
@@ -532,12 +535,14 @@ export class TaskService {
             items: { material: true, cut_history: { user: true } },
           },
         },
+        inspection: true,
       },
     });
 
-    const filteredTasks = tasks.filter(
-      (th) => th.approved == false && th.completed > 0,
-    );
+    const filteredTasks = tasks.filter((th) => {
+      console.log('aqui => ', th);
+      return th.approved == false && th.completed > 0 && th.inspection == null;
+    });
 
     return filteredTasks.map((th) => {
       return {
@@ -566,6 +571,7 @@ export class TaskService {
       };
     });
   }
+
   async qcReviewCutMaterials(
     cutTaskItemDtos: CutTaskItemDto[],
     areaId: number,
@@ -579,6 +585,7 @@ export class TaskService {
             //assigned: task_assigned,
             area: { _id: areaId } as Area,
             task: { _id: task_id } as Task,
+            created_at: review_date,
           });
 
           await toArea.save();
@@ -605,12 +612,14 @@ export class TaskService {
     areaId: number,
     userId: number,
   ) {
+    const dateOfApproval = new Date();
     for (const { _id, quantity, task_id } of taskAreaHistoryDto) {
       try {
         await this.taskAreaHistoryRepo.update(
           { _id },
           {
             approved: quantity > 0 ? true : false,
+            date_approval: dateOfApproval,
             reviewed_by: { _id: userId } as User,
           },
         );
@@ -634,6 +643,7 @@ export class TaskService {
             //quantity: task_quantity,
             area: { _id: areaId } as Area,
             task: { _id: task_id } as Task,
+            created_at: dateOfApproval,
           });
 
           await toArea.save();
@@ -653,6 +663,14 @@ export class TaskService {
   async qcInspectCutHistory(_id: number, inspection: MaterialInspection) {
     try {
       return await this.cutHistoryRepo.update({ _id }, { inspection });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  async qcInspectTareaHistory(_id: number, inspection: MemberInspection) {
+    try {
+      return await this.taskAreaHistoryRepo.update({ _id }, { inspection });
     } catch (error) {
       console.log(error);
     }
@@ -730,27 +748,39 @@ export class TaskService {
   // }
 
   async moveToArea(taskToArea: TaskToAreaDto[], userId: number) {
+    const created_at = new Date();
     for (const { _id, quantity } of taskToArea) {
       try {
-        const t = await this.taskAreaHistoryRepo.findOne({
-          where: { task_area: { _id }, completed: 0 },
-          relations: { task_area: true },
+        const toArea = this.taskAreaHistoryRepo.create({
+          completed: quantity,
+          created_at,
+          date_approval: null,
+          task_area: { _id: _id } as Task,
+          user: { _id: userId } as User,
         });
+        await toArea.save();
+        // const t = await this.taskAreaHistoryRepo.findOne({
+        //   where: { task_area: { _id }, completed: 0 },
+        //   relations: { task_area: true },
+        // });
 
-        if (t == null) {
-          const toArea = this.taskAreaHistoryRepo.create({
-            completed: quantity,
-            task_area: { _id: _id } as Task,
-            user: { _id: userId } as User,
-          });
-          await toArea.save();
-        } else {
-          await this.taskAreaHistoryRepo.update(
-            { _id: t._id },
-            { completed: 1 },
-          );
-        }
-      } catch (error) {}
+        // if (t == null) {
+        //   const toArea = this.taskAreaHistoryRepo.create({
+        //     completed: quantity,
+        //     created_at,
+        //     task_area: { _id: _id } as Task,
+        //     user: { _id: userId } as User,
+        //   });
+        //   await toArea.save();
+        // } else {
+        //   await this.taskAreaHistoryRepo.update(
+        //     { _id: t._id },
+        //     { completed: 1, date_approval: created_at },
+        //   );
+        // }
+      } catch (error) {
+        console.log('move to area error : ', error);
+      }
     }
   }
 
@@ -764,7 +794,7 @@ export class TaskService {
     return 'deleted';
   }
 
-  async getReports(paqueteId: number, completed: boolean = false) {
+  async getMaterialsReports(paqueteId: number, completed: boolean = false) {
     const items = await this.cutHistoryRepo.find({
       // where: {
       //   task_item: { task: { member: { paquete: { _id: paqueteId } } } },
@@ -794,12 +824,46 @@ export class TaskService {
                 cut_history: [],
               },
             ],
+            members: [],
           };
         }
       })
       .filter(Boolean);
   }
 
+  async getMembersReports(paqueteId: number, completed: boolean = false) {
+    const tasks = await this.taskAreaHistoryRepo.find({
+      relations: {
+        inspection: {
+          criteriaAnswers: { criteria: true },
+          inspector: true,
+          fabricator: true,
+        },
+        task_area: { task: { member: true } },
+      },
+    });
+
+    return tasks
+      .map((task) => {
+        if (task.inspection != null && task.inspection.completed == completed) {
+          const { criteriaAnswers, ...rest } = task.inspection;
+          return {
+            criteria_answers: criteriaAnswers,
+            ...rest,
+            members: [
+              {
+                ...task.task_area.task.member,
+                quantity: 1,
+                materials: [],
+                areas: [],
+              },
+            ],
+            materials: [],
+          };
+        }
+      })
+      .filter(Boolean);
+  }
   // async getReport(reportId: number) {
   //   try {
   //     const item = await this.cutHistoryRepo.findOneOrFail({
