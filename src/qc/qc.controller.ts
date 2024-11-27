@@ -259,7 +259,7 @@ export class QcController {
 
     const userId = req.user.sub;
 
-    return this.qcService.updateReportMember(
+    return await this.qcService.updateReportMember(
       reportId,
       rfDto,
       imageUrls,

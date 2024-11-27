@@ -82,6 +82,9 @@ export class MemberInspection {
   @Column({ type: 'boolean', default: false })
   completed: boolean;
 
+  @Column({ default: '' })
+  report_link: string;
+
   @ManyToOne(() => SpecialUser)
   inspector: SpecialUser;
 

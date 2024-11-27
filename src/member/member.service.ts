@@ -90,7 +90,10 @@ export class MemberService {
         paquete: true,
         tasks: {
           items: { material: true, cut_history: true },
-          task_area: { history: { user: true, reviewed_by: true }, area: true },
+          task_area: {
+            history: { user: true, reviewed_by: true, inspection: true },
+            area: true,
+          },
         },
       },
     });
@@ -199,6 +202,9 @@ export class MemberService {
                       created_at: h.created_at,
                       quantity: h.completed,
                       approved: h.approved,
+                      inspection_link: h.inspection
+                        ? h.inspection.report_link
+                        : '',
                     };
                     // }
                   })
@@ -223,6 +229,7 @@ export class MemberService {
                       quantity: 0,
                       created_at: h.created_at,
                       approved: 0,
+                      inspection_link: [],
                     };
                   }
 
@@ -233,8 +240,20 @@ export class MemberService {
                   // Update the latest date_of_approval
                   const dAp1 = new Date(acc[key].date_of_approval).getTime();
                   const dAp2 = new Date(h.date_of_approval).getTime();
+
+                  // Update the latest date_of_approval
+                  const dCr1 = new Date(acc[key].created_at).getTime();
+                  const dCr2 = new Date(h.created_at).getTime();
+
                   if (dAp1 < dAp2) {
                     acc[key].date_of_approval = h.date_of_approval;
+                  }
+
+                  if (dCr1 < dCr2) {
+                    acc[key].created_at = h.created_at;
+                  }
+                  if (h.inspection_link.length > 5) {
+                    acc[key].inspection_link.push(h.inspection_link);
                   }
 
                   return acc;

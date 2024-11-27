@@ -18,6 +18,7 @@ import { writeFileSync } from 'fs';
 import { S3Service } from 'src/s3/s3.service';
 import puppeteer from 'puppeteer';
 import { TaskArea } from 'src/task/entities/taskarea.entity';
+import { Member } from 'src/member/entities/member.entity';
 
 @Injectable()
 export class QcService {
@@ -264,7 +265,7 @@ export class QcService {
           (url) => `<img src="${url}" alt="material image" />`,
         );
 
-        const html = this.genHtml(rep, questions, answers, photos);
+        const html = this.genHtml(rep, questions, answers, photos, '');
 
         const pdfBuffer = await this.createPdfFromHtml(html);
 
@@ -295,7 +296,7 @@ export class QcService {
     imageUrls: any,
     userId: number,
   ): Promise<string> {
-    const inspection = await this.matInsRepo.findOne({
+    const inspection = await this.memInsRepo.findOne({
       where: { _id: rfId },
       relations: { inspector: true, fabricator: true, criteriaAnswers: true },
     });
@@ -316,7 +317,7 @@ export class QcService {
 
     //rfDto.photos = imageUrls;
     try {
-      await this.matInsRepo.update(
+      await this.memInsRepo.update(
         { _id: rfId },
         {
           inspection_type: rest.inspection_type,
@@ -344,7 +345,7 @@ export class QcService {
       }
 
       if (rest.completed) {
-        const rep = await this.matInsRepo.findOne({
+        const rep = await this.memInsRepo.findOne({
           where: { _id: rfId },
           relations: {
             inspector: true,
@@ -365,15 +366,21 @@ export class QcService {
           (url) => `<img src="${url}" alt="material image" />`,
         );
 
-        const html = this.genHtml(rep, questions, answers, photos);
+        const member = rfDto['members'][0] as Member;
+        const html = this.genHtml(
+          rep,
+          questions,
+          answers,
+          photos,
+          `${member.mem_desc} ${member.piecemark}`,
+        );
 
         const pdfBuffer = await this.createPdfFromHtml(html);
 
         const key = `report${rfId}${Date.now()}`;
         const url = await this.s3Service.uploadPdfToS3(pdfBuffer, key);
-        //console.log('url : ', url);
 
-        await this.matInsRepo.update({ _id: rfId }, { report_link: url });
+        await this.memInsRepo.update({ _id: rfId }, { report_link: url });
         return url;
         // const fileId = await this.googleDriveService.uploadPdfToDrive(
         //   pdfBuffer,
@@ -418,10 +425,11 @@ export class QcService {
   }
 
   genHtml(
-    inspection: MaterialInspection,
+    inspection: MaterialInspection | MemberInspection,
     questions: string[],
     answers: string[],
     photos: string[],
+    piecemark: string,
   ): string {
     const head = `
     <head>
@@ -527,7 +535,7 @@ export class QcService {
         </div>
         <div>
           <p>${inspection.job}</p>
-          <p>${inspection['piecemark']}</p>
+          <p>${piecemark}</p>
           <p>${inspection.inspection_type}</p>
           <p>${inspection.fabricator.name}</p>
           <p>${inspection.inspector.name}</p>

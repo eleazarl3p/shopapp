@@ -540,7 +540,6 @@ export class TaskService {
     });
 
     const filteredTasks = tasks.filter((th) => {
-      console.log('aqui => ', th);
       return th.approved == false && th.completed > 0 && th.inspection == null;
     });
 
