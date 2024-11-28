@@ -91,9 +91,9 @@ export class MemberInspection {
   @ManyToOne(() => SpecialUser)
   fabricator: SpecialUser;
 
-  @OneToOne(() => TaskItem)
-  @JoinColumn()
-  task_area: TaskItem;
+  // @OneToOne(() => TaskItem)
+  // @JoinColumn()
+  // task_area: TaskItem;
 
   @OneToMany(() => InspectionCriteria, (ic) => ic.memberInpection)
   criteriaAnswers: InspectionCriteria[];

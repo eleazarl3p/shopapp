@@ -164,7 +164,7 @@ export class QcService {
           ...rest,
           inspector: { _id: inspector._id } as SpecialUser,
           fabricator: { _id: fabricator._id } as SpecialUser,
-          task_area: { _id } as TaskArea,
+          // task_area: { _id } as TaskArea,
         });
 
         const toSaveAnswer = [];
