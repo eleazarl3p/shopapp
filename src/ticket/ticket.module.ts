@@ -9,10 +9,19 @@ import { MemberModule } from 'src/member/member.module';
 import { OtherItem } from './entity/other-item.entity';
 import { JobModule } from 'src/job/job.module';
 import { Tcomment } from './entity/tcomment.entity';
+import { PaintingTicket } from './entity/painting-ticket.entity';
+import { PaintingTicketHistory } from './entity/painting-ticket-history.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Ticket, TicketMember, OtherItem, Tcomment]),
+    TypeOrmModule.forFeature([
+      Ticket,
+      TicketMember,
+      OtherItem,
+      Tcomment,
+      PaintingTicket,
+      PaintingTicketHistory,
+    ]),
     MemberModule,
     JobModule,
   ],

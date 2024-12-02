@@ -17,8 +17,9 @@ import { InspectionCriteria } from './entity/inspection-criteria.entity';
 import { writeFileSync } from 'fs';
 import { S3Service } from 'src/s3/s3.service';
 import puppeteer from 'puppeteer';
-import { TaskArea } from 'src/task/entities/taskarea.entity';
 import { Member } from 'src/member/entities/member.entity';
+import { InspectionStatus, iStatus } from './entity/inspection-status.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class QcService {
@@ -31,6 +32,9 @@ export class QcService {
 
     @InjectRepository(InspectionCriteria)
     private readonly inspectionCriteriaRepo: Repository<InspectionCriteria>,
+
+    @InjectRepository(InspectionStatus)
+    private readonly inspectionStatusRepo: Repository<InspectionStatus>,
 
     private readonly jobService: JobService,
     private readonly taskService: TaskService,
@@ -142,9 +146,18 @@ export class QcService {
         }
 
         const crAns = await this.inspectionCriteriaRepo.save(toSaveAnswer);
+
         mainsp.criteriaAnswers = crAns;
 
         const inspection = await this.matInsRepo.save(mainsp);
+
+        const ciStatus = this.inspectionStatusRepo.create({
+          status: iStatus.CREATE,
+          user: { _id: userId } as User,
+          material_inspection: inspection,
+        });
+
+        await ciStatus.save();
 
         await this.taskService.qcInspectCutHistory(_id, inspection);
 
@@ -181,6 +194,14 @@ export class QcService {
         meminsp.criteriaAnswers = crAns;
 
         const inspection = await this.memInsRepo.save(meminsp);
+
+        const ciStatus = this.inspectionStatusRepo.create({
+          status: iStatus.CREATE,
+          user: { _id: userId } as User,
+          member_inspection: inspection,
+        });
+
+        await ciStatus.save();
 
         await this.taskService.qcInspectTareaHistory(_id, inspection);
       } catch (error) {
@@ -274,6 +295,15 @@ export class QcService {
         //console.log('url : ', url);
 
         await this.matInsRepo.update({ _id: rfId }, { report_link: url });
+
+        const ciStatus = this.inspectionStatusRepo.create({
+          status: iStatus.CLOSE,
+          user: { _id: userId } as User,
+          material_inspection: inspection,
+        });
+
+        await ciStatus.save();
+
         return url;
         // const fileId = await this.googleDriveService.uploadPdfToDrive(
         //   pdfBuffer,
@@ -283,6 +313,14 @@ export class QcService {
         // return fileId;
         //return '';
       }
+
+      const ciStatus = this.inspectionStatusRepo.create({
+        status: iStatus.UPDATE,
+        user: { _id: userId } as User,
+        material_inspection: inspection,
+      });
+
+      await ciStatus.save();
 
       return '';
     } catch (error) {
@@ -381,6 +419,15 @@ export class QcService {
         const url = await this.s3Service.uploadPdfToS3(pdfBuffer, key);
 
         await this.memInsRepo.update({ _id: rfId }, { report_link: url });
+
+        const ciStatus = this.inspectionStatusRepo.create({
+          status: iStatus.CLOSE,
+          user: { _id: userId } as User,
+          member_inspection: inspection,
+        });
+
+        await ciStatus.save();
+
         return url;
         // const fileId = await this.googleDriveService.uploadPdfToDrive(
         //   pdfBuffer,
@@ -390,7 +437,13 @@ export class QcService {
         // return fileId;
         //return '';
       }
+      const ciStatus = this.inspectionStatusRepo.create({
+        status: iStatus.UPDATE,
+        user: { _id: userId } as User,
+        member_inspection: inspection,
+      });
 
+      await ciStatus.save();
       return '';
     } catch (error) {
       console.log(error);

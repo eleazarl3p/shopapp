@@ -2,14 +2,12 @@ import { SpecialUser } from 'src/specialuser/entity/special-user.entity';
 import {
   Column,
   Entity,
-  JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { InspectionCriteria } from './inspection-criteria.entity';
-import { TaskItem } from 'src/task/entities/task-item.entity';
+import { InspectionStatus } from './inspection-status.entity';
 
 export enum fitUpInspection {
   INPROGRESS = 'In Progress',
@@ -54,6 +52,9 @@ export class MaterialInspection {
 
   @OneToMany(() => InspectionCriteria, (ic) => ic.materialInpection)
   criteriaAnswers: InspectionCriteria[];
+
+  @OneToMany(() => InspectionStatus, (is) => is.material_inspection)
+  i_status: InspectionStatus[];
 }
 
 @Entity()
@@ -91,10 +92,9 @@ export class MemberInspection {
   @ManyToOne(() => SpecialUser)
   fabricator: SpecialUser;
 
-  // @OneToOne(() => TaskItem)
-  // @JoinColumn()
-  // task_area: TaskItem;
-
   @OneToMany(() => InspectionCriteria, (ic) => ic.memberInpection)
   criteriaAnswers: InspectionCriteria[];
+
+  @OneToMany(() => InspectionStatus, (is) => is.member_inspection)
+  i_status: InspectionStatus[];
 }

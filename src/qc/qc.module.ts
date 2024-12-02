@@ -11,6 +11,7 @@ import {
 } from './entity/inspection.entity';
 import { InspectionCriteria } from './entity/inspection-criteria.entity';
 import { S3Module } from 'src/s3/s3.module';
+import { InspectionStatus } from './entity/inspection-status.entity';
 // import { GgdrvModule } from 'src/ggdrv/ggdrv.module';
 // import { GldriveModule } from 'src/gldrive/gldrive.module';
 
@@ -21,6 +22,7 @@ import { S3Module } from 'src/s3/s3.module';
       InspectionCriteria,
       MemberInspection,
       MaterialInspection,
+      InspectionStatus,
     ]),
     TaskModule,
     JobModule,

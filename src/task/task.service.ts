@@ -247,7 +247,7 @@ export class TaskService {
       where: {
         area: { _id: areaId },
         task: {
-          task_area: { area: { _id: areaId } },
+          task_area: { area: { _id: areaId }, on_hold: false },
           member: { paquete: { _id: paqueteId } },
         },
       },
@@ -273,21 +273,6 @@ export class TaskService {
         return ft;
       }
     });
-    //   if (notCompleted) {
-    //     return ft;
-    //   }
-    // });
-    // .filter((ft: { history: any[]; member: { quantity: number } }) => {
-    //   const totCompleted = ft.history.reduce(
-    //     (acc, h) => (acc += h.completed),
-    //     0,
-    //   );
-
-    //   if (ft.member.quantity > totCompleted) {
-    //     return ft;
-    //   }
-    // })
-    // .filter(Boolean);
   }
 
   async pendingTaskMachine(machineId: number, paqueteId: number, all: boolean) {
@@ -440,36 +425,6 @@ export class TaskService {
         },
       };
     });
-    // const items = await this.taskItemRepo.find({
-    //   where: {
-    //     task: { member: { paquete: { _id: paqueteId } } },
-    //   },
-    //   relations: {
-    //     task: { team: true, member: true },
-    //     machine: true,
-    //     material: true,
-    //     cut_history: { user: true, inspection: true },
-    //   },
-    // });
-    // const taskItems = this.formatTaskItems(items);
-    // return taskItems
-    //   .map((task) => {
-    //     const failed = task.member.materials[0].cut_history.filter(
-    //       (ch) =>
-    //         ch.approved != null &&
-    //         ch.quantity > ch.approved &&
-    //         ch.inspection == null,
-    //     );
-    //     if (failed.length) {
-    //       task.member.materials[0].cut_history = failed;
-    //       task.member.materials[0].quantity = failed.reduce(
-    //         (acc, c) => (acc += c.quantity - c.approved),
-    //         0,
-    //       );
-    //       return task;
-    //     }
-    //   })
-    //   .filter(Boolean);
   }
 
   async qcCompletedTasks(paqueteId: number) {
@@ -622,27 +577,14 @@ export class TaskService {
             reviewed_by: { _id: userId } as User,
           },
         );
-        //if (quantity == 0) {
-        //   const t = await this.taskAreaHistoryRepo.findOne({
-        //     where: { _id },
-        //     relations: { task_area: true },
-        //   });
 
-        //   if (t != null) {
-        //     const newHistory = this.taskAreaHistoryRepo.create({
-        //       task_area: t.task_area,
-        //       user: { _id: userId } as User,
-        //     });
-
-        //     await newHistory.save();
-        //   }
-        // } else {
         if (quantity > 0) {
           const toArea = this.taskAreaRepo.create({
             //quantity: task_quantity,
             area: { _id: areaId } as Area,
             task: { _id: task_id } as Task,
             created_at: dateOfApproval,
+            on_hold: areaId == 4 ? true : false,
           });
 
           await toArea.save();

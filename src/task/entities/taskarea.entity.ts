@@ -25,6 +25,9 @@ export class TaskArea extends BaseEntity {
   @Column()
   area_id: number;
 
+  @Column({ default: false })
+  on_hold: boolean;
+
   @ManyToOne(() => Task, (task) => task.task_area, {
     onDelete: 'CASCADE',
   })
