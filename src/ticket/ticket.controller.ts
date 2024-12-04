@@ -16,7 +16,7 @@ import { TicketService } from './ticket.service';
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { LoadTicketDto } from './dto/load-ticket.dto';
-import { DeliveredTicketDto } from './dto/deliver-ticket.dto';
+
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('ticket')

@@ -616,77 +616,6 @@ export class TaskService {
       console.log(error);
     }
   }
-  // async fullyCutTasks(paqueteId: number) {
-  //   const tasks = await this.taskRepo.find({
-  //     where: { member: { paquete: { _id: paqueteId } } },
-  //     relations: {
-  //       items: {
-  //         cut_history: true,
-  //         material: true,
-  //       },
-  //       member: { member_material: { material: true } },
-  //       team: true,
-  //       task_area: true,
-  //     },
-  //   });
-
-  //   const formatedTasks = tasks.map((tsk) => {
-  //     return {
-  //       _id: tsk._id,
-  //       expected_date: tsk.expected_date,
-  //       assigned: tsk.quantity,
-  //       team: tsk.team.name,
-  //       member: {
-  //         _id: tsk.member._id,
-  //         idx_pcmk: tsk.member.idx_pcmk,
-  //         main_material: tsk.member.main_material,
-  //         piecemark: tsk.member.piecemark,
-  //         barcode: tsk.member.barcode,
-  //         mem_desc: tsk.member.mem_desc,
-  //         quantity: tsk.quantity,
-  //         //create_date: tsk.member.create_date,
-  //         //weight: 0,
-  //         materials: tsk.member.member_material.map((mm) => {
-  //           return {
-  //             ...mm.material,
-  //             quantity: mm.quantity,
-  //             cut_history: tsk.items
-  //               .filter((it) => it.material._id == mm.material._id)
-  //               .pop().cut_history,
-  //           };
-  //         }),
-  //         areas: tsk.task_area,
-  //       },
-  //       machine: '',
-  //     };
-  //   });
-
-  //   const Q = formatedTasks
-  //     .map((ft) => {
-  //       const T = [];
-
-  //       ft.member.materials.forEach((material) => {
-  //         const totCut = material.cut_history.reduce(
-  //           (acc, c) => (acc += c.approved != null ? c.approved : 0),
-  //           0,
-  //         );
-
-  //         const tn = Math.floor(totCut / material.quantity);
-  //         T.push(tn);
-  //       });
-
-  //       if (T.length) {
-  //         const fc = Math.min(...T);
-  //         if (fc > 0 && ft.member.areas.length == 0) {
-  //           ft.member.quantity = fc;
-  //           return ft;
-  //         }
-  //       }
-  //     })
-  //     .filter(Boolean);
-
-  //   return Q;
-  // }
 
   async moveToArea(taskToArea: TaskToAreaDto[], userId: number) {
     const created_at = new Date();
@@ -805,56 +734,22 @@ export class TaskService {
       })
       .filter(Boolean);
   }
-  // async getReport(reportId: number) {
-  //   try {
-  //     const item = await this.cutHistoryRepo.findOneOrFail({
-  //       where: { inspection: { _id: reportId } },
-  //       relations: {
-  //         inspection: {
-  //           criteriaAnswers: { criteria: true },
-  //           inspector: true,
-  //           fabricator: true,
-  //         },
-  //         task_item: { material: true },
-  //       },
-  //     });
 
-  //     const { criteriaAnswers, ...rest } = item.inspection;
-  //     return {
-  //       criteria_answers: criteriaAnswers,
-  //       ...rest,
-  //       materials: [
-  //         {
-  //           ...item.task_item.material,
-  //           quantity: item.quantity - item.approved,
-  //           cut_history: [],
-  //         },
-  //       ],
-  //     };
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
+  async taskOnHold(paqueteId: number) {
+    const tasks = await this.taskAreaRepo.find({
+      where: {
+        on_hold: true,
+        task: { member: { paquete: { _id: paqueteId } } },
+      },
+      relations: { task: { member: true } },
+    });
 
-  //   // return items
-  //   //   .map((item) => {
-  //   //     if (item.inspection != null) {
-  //   //       const { criteriaAnswers, ...rest } = item.inspection;
-  //   //       return {
-  //   //         criteria_answers: criteriaAnswers,
-  //   //         ...rest,
-  //   //         materials: [
-  //   //           {
-  //   //             ...item.task_item.material,
-  //   //             quantity: item.quantity - item.approved,
-  //   //             cut_history: [],
-  //   //           },
-  //   //         ],
-  //   //       };
-  //   //     }
-  //   //   })
-  //   //   .filter(Boolean);
-  // }
-  // async updateReport(reportId: number, rfDto: RFDto, userId: number) {
-  //   return rfDto;
-  // }
+    return tasks.map((t) => {
+      const { task, ...rest } = t;
+      return {
+        ...rest,
+        member: { ...task.member, quantity: 1 },
+      };
+    });
+  }
 }

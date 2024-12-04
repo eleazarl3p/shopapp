@@ -8,7 +8,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { PaintingTicketHistory } from './painting-ticket-history.entity';
+import { PaintTicketHistory } from './paint-ticket-history.entity';
 
 export enum paintingType {
   'GALVANIZED' = 'GALVANIZED',
@@ -16,7 +16,7 @@ export enum paintingType {
 }
 
 @Entity()
-export class PaintingTicket {
+export class PaintTicket {
   @PrimaryGeneratedColumn()
   _id: number;
 
@@ -29,8 +29,8 @@ export class PaintingTicket {
   @ManyToOne(() => Truck)
   truck: Truck;
 
-  @OneToMany(() => PaintingTicketHistory, (pth) => pth.ticket)
-  history: PaintingTicketHistory[];
+  @OneToMany(() => PaintTicketHistory, (pth) => pth.ticket)
+  history: PaintTicketHistory[];
 
   @CreateDateColumn({ type: 'datetime' })
   created_at: Date;

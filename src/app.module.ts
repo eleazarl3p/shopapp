@@ -23,6 +23,7 @@ import { SpecialuserModule } from './specialuser/specialuser.module';
 import { QcModule } from './qc/qc.module';
 import { ConfigModule } from '@nestjs/config';
 import { S3Module } from './s3/s3.module';
+import { PaintTicketModule } from './paint-ticket/paint-ticket.module';
 
 dotenv.config();
 @Module({
@@ -59,6 +60,8 @@ dotenv.config();
     SpecialuserModule,
 
     S3Module,
+
+    PaintTicketModule,
   ],
   controllers: [AppController],
   providers: [AppService],

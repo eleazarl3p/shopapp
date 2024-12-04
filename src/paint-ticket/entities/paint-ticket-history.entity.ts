@@ -5,20 +5,20 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { PaintingTicket } from './painting-ticket.entity';
+import { PaintTicket } from './paint-ticket.entity';
 
 export type HAction = 'OUT' | 'IN';
 
 @Entity()
-export class PaintingTicketHistory {
+export class PaintTicketHistory {
   @PrimaryGeneratedColumn()
   _id: number;
 
   @Column({ type: 'varchar' })
   action: HAction;
 
-  @ManyToOne(() => PaintingTicket, (pt) => pt.history)
-  ticket: PaintingTicket;
+  @ManyToOne(() => PaintTicket, (pt) => pt.history)
+  ticket: PaintTicket;
 
   @CreateDateColumn({ type: 'datetime' })
   date: Date;
