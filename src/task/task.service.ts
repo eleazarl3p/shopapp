@@ -33,6 +33,7 @@ import {
 import { RFDto } from 'src/qc/dto/rf.dto';
 import e from 'express';
 import { error } from 'console';
+import { PaintTicket } from 'src/paint-ticket/entities/paint-ticket.entity';
 
 @Injectable()
 export class TaskService {
@@ -751,5 +752,12 @@ export class TaskService {
         member: { ...task.member, quantity: 1 },
       };
     });
+  }
+
+  async updateForPaint(_id: number, ticketId: number) {
+    await this.taskAreaRepo.update(
+      { _id },
+      { paint_ticket: { _id: ticketId } as PaintTicket },
+    );
   }
 }

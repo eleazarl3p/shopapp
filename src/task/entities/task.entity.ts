@@ -11,6 +11,7 @@ import {
 } from 'typeorm';
 import { TaskItem } from './task-item.entity';
 import { TaskArea } from './taskarea.entity';
+import { PaintTicket } from 'src/paint-ticket/entities/paint-ticket.entity';
 
 @Entity()
 export class Task extends BaseEntity {

@@ -1,14 +1,18 @@
 import { Truck } from 'src/truck/entities/truck.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
+  BaseEntity,
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PaintTicketHistory } from './paint-ticket-history.entity';
+import { TaskArea } from 'src/task/entities/taskarea.entity';
 
 export enum paintingType {
   'GALVANIZED' = 'GALVANIZED',
@@ -16,7 +20,7 @@ export enum paintingType {
 }
 
 @Entity()
-export class PaintTicket {
+export class PaintTicket extends BaseEntity {
   @PrimaryGeneratedColumn()
   _id: number;
 
@@ -31,6 +35,9 @@ export class PaintTicket {
 
   @OneToMany(() => PaintTicketHistory, (pth) => pth.ticket)
   history: PaintTicketHistory[];
+
+  @OneToMany(() => TaskArea, (ta) => ta.paint_ticket)
+  task_area: TaskArea[];
 
   @CreateDateColumn({ type: 'datetime' })
   created_at: Date;

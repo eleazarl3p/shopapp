@@ -1,5 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsArray, IsNumber, IsString, ValidateNested } from 'class-validator';
+import {
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
+} from 'class-validator';
 import { CreateMaterialDto } from 'src/material/dto/create-material.dto';
 
 export class CreateMemberDto {

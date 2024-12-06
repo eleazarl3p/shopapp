@@ -12,6 +12,7 @@ import { Task } from './task.entity';
 import { Area } from 'src/area/entities/area.entity';
 
 import { TaskAreaHistory } from './taskarea-history';
+import { PaintTicket } from 'src/paint-ticket/entities/paint-ticket.entity';
 
 @Entity()
 @Unique(['task_id', 'area_id'])
@@ -37,6 +38,9 @@ export class TaskArea extends BaseEntity {
     onDelete: 'CASCADE',
   })
   area: Area;
+
+  @ManyToOne(() => PaintTicket, (pt) => pt.task_area, { onDelete: 'CASCADE' })
+  paint_ticket: PaintTicket;
 
   @OneToMany(() => TaskAreaHistory, (tah) => tah.task_area)
   history: TaskAreaHistory[];
