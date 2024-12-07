@@ -28,8 +28,8 @@ export class PaintTicketDto {
   @IsString()
   paint_type: paintingType;
 
-  @IsNumber()
-  truck_id: number;
+  @IsString()
+  job: string;
 
   @IsArray()
   @ValidateNested({ each: true })

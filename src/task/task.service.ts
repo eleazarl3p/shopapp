@@ -737,16 +737,20 @@ export class TaskService {
   }
 
   async taskOnHold(paqueteId: number) {
-    const tasks = await this.taskAreaRepo.find({
-      where: {
-        on_hold: true,
-        task: { member: { paquete: { _id: paqueteId } } },
-      },
-      relations: { task: { member: true } },
-    });
+    const tasks = await this.taskAreaRepo
+      .find({
+        where: {
+          on_hold: true,
+          task: {
+            member: { paquete: { _id: paqueteId } },
+          },
+        },
+        relations: { task: { member: true }, paint_ticket: true },
+      })
+      .then((tsks) => tsks.filter((t) => t.paint_ticket == null));
 
     return tasks.map((t) => {
-      const { task, ...rest } = t;
+      const { task, paint_ticket, ...rest } = t;
       return {
         ...rest,
         member: { ...task.member, quantity: 1 },

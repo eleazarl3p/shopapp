@@ -5,10 +5,8 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   OneToMany,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { PaintTicketHistory } from './paint-ticket-history.entity';
@@ -26,6 +24,9 @@ export class PaintTicket extends BaseEntity {
 
   @Column({ type: 'enum', enum: paintingType })
   painting_type: paintingType;
+
+  @Column({ nullable: true })
+  barcode: string;
 
   @ManyToOne(() => User)
   created_by: User;

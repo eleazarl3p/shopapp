@@ -1,4 +1,12 @@
-import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Post,
+  Req,
+  UseGuards,
+} from '@nestjs/common';
 
 import { PaintTicketDto } from 'src/task/dto/task-on-hold';
 import { PaintTicketService } from './paint-ticket.service';
@@ -17,5 +25,10 @@ export class PaintTicketController {
   ) {
     const userId = req.user.sub;
     return await this.paintTicketService.create(ticketDto, userId);
+  }
+
+  @Get(':id')
+  findOne(@Param('id') ticketId: number) {
+    return this.paintTicketService.findOne(ticketId);
   }
 }

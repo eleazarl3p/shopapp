@@ -19,7 +19,6 @@ export class PaintTicketService {
 
   async create(ticketDto: PaintTicketDto, userId: number) {
     const ticket = this.paintTicketRepo.create({
-      truck: { _id: ticketDto.truck_id } as Truck,
       painting_type: ticketDto.paint_type,
       created_by: { _id: userId } as User,
     });
@@ -31,5 +30,36 @@ export class PaintTicketService {
         await this.taskService.updateForPaint(ta._id, savedTicket._id);
       }),
     );
+    const barcode = `PT-${ticketDto.job}-${savedTicket._id.toString().padStart(5, '0')}`;
+    await this.paintTicketRepo.update({ _id: savedTicket._id }, { barcode });
+    return this.findOne(savedTicket._id);
+  }
+
+  async findOne(_id: number) {
+    const ticket = await this.paintTicketRepo.findOne({
+      where: { _id },
+      relations: {
+        task_area: { task: { member: true } },
+        truck: true,
+        history: true,
+        created_by: true,
+      },
+    });
+
+    return {
+      _id: ticket._id,
+      painting_type: ticket.painting_type,
+      created_by: ticket.created_by.fullname(),
+      created_at: ticket.created_at,
+      truck: !ticket.truck ? null : ticket.truck.name,
+      members: ticket.task_area.map((ta) => {
+        return {
+          ...ta.task.member,
+          quantity: 1,
+        };
+      }),
+      history: ticket.history,
+      barcode: ticket.barcode,
+    };
   }
 }
