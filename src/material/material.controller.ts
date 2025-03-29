@@ -10,6 +10,11 @@ export class MaterialController {
     return this.materialService.findAll(jobid);
   }
 
+  @Get('all/paquete/:id/')
+  findAllByPaquete(@Param('id', ParseIntPipe) id: number) {
+    return this.materialService.findAllByPaquete(id);
+  }
+
   @Get('one/:barcode')
   findOne(@Param('barcode') barcode: string) {
     return this.materialService.findOne(barcode);

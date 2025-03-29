@@ -25,6 +25,8 @@ import { ConfigModule } from '@nestjs/config';
 import { S3Module } from './s3/s3.module';
 import { PaintTicketModule } from './paint-ticket/paint-ticket.module';
 
+import * as fs from 'fs';
+
 dotenv.config();
 @Module({
   imports: [
@@ -36,6 +38,9 @@ dotenv.config();
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       entities: [],
+      ssl: {
+        ca: fs.readFileSync('ca.pem'),
+      },
       autoLoadEntities: true,
       synchronize: true,
       timezone: 'Z',
