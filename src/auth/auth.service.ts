@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 
 import { UserService } from 'src/user/user.service';
 import { LoginDto } from './dto/login.dto';
-import * as bcrypt from 'bcrypt';
+//import * as bcrypt from 'bcrypt';
 import { User } from 'src/user/entities/user.entity';
 //import { log } from 'console';
 
@@ -28,9 +28,9 @@ export class AuthService {
 
     if (!user) return null;
 
-    const passwordValid = await bcrypt.compare(password, user.password);
+    //const passwordValid = await bcrypt.compare(password, user.password);
 
-    if (user && passwordValid) return user;
+    if (user.password == password) return user;
 
     return null;
   }

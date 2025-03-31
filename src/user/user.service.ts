@@ -9,7 +9,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import * as bcrypt from 'bcrypt';
+//import * as bcrypt from 'bcrypt';
 import { Level } from 'src/level/entities/level.entity';
 import { Team } from 'src/team/entities/team.entity';
 
@@ -108,8 +108,8 @@ export class UserService {
   }
 
   async hashPassword(password: string): Promise<string> {
-    const salt = await bcrypt.genSalt(10);
-    return bcrypt.hash(password, salt);
+    //const salt = await bcrypt.genSalt(10);
+    return password; //bcrypt.hash(password, salt);
   }
 
   async remove(_id: number) {
