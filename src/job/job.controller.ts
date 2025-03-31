@@ -15,7 +15,7 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('job')
-//@UseGuards(AuthGuard('jwt'))
+@UseGuards(AuthGuard('jwt'))
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
