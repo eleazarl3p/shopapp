@@ -122,6 +122,7 @@ export class QcController {
     @Body('json') jsonData: string,
     @Request() req: any,
   ) {
+    console.log('here');
     let imageUrls = [];
 
     if (photos != null && photos.length > 0) {

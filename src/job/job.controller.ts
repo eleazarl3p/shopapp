@@ -15,7 +15,7 @@ import { UpdateJobDto } from './dto/update-job.dto';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('job')
-@UseGuards(AuthGuard('jwt'))
+//@UseGuards(AuthGuard('jwt'))
 export class JobController {
   constructor(private readonly jobService: JobService) {}
 
@@ -34,6 +34,7 @@ export class JobController {
     return this.jobService.update(id, updateModelDto);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
   //delete(@Param('id') id: number, @GetUser() user) {
   delete(@Param('id') id: number, @Req() req: any) {
